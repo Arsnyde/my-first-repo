@@ -1,0 +1,50 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "${mod_license}"
+issueTrackerURL = "https://github.com/arsnyde/my-first-repo/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = '''
+${mod_description}
+
+Eight full legendary armour sets, each forged from a mix of vanilla Minecraft materials,
+Cobblemon evolution stones / type gems / held items, and - where the mod is installed -
+Mega Showdown key items such as the Red Orb, Blue Orb and Legend Plate.
+
+Wearing a complete set grants a themed set bonus and multiplies the spawn weight of the
+Pokemon types that legendary presides over.
+'''
+
+[[dependencies.legendary_armory]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.214,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.legendary_armory]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.legendary_armory]]
+modId = "cobblemon"
+type = "required"
+versionRange = "[1.8.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+# Mega Showdown is optional: its recipes are gated behind a neoforge:mod_loaded condition and
+# every set that uses one of its key items also ships a Cobblemon-only fallback recipe.
+[[dependencies.legendary_armory]]
+modId = "mega_showdown"
+type = "optional"
+versionRange = "[1.0.0,)"
+ordering = "AFTER"
+side = "BOTH"

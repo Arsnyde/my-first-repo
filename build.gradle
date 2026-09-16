@@ -1,0 +1,99 @@
+plugins {
+    id 'java'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+
+version = mod_version
+group = mod_group
+base { archivesName = "${mod_id}-neoforge-${minecraft_version}" }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = project.neoforge_version
+
+    parchment {
+        minecraftVersion = project.parchment_minecraft
+        mappingsVersion = project.parchment_version
+    }
+
+    runs {
+        configureEach {
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+            // Cobblemon is Kotlin-heavy; give the dev runs some breathing room.
+            jvmArgument '-Xmx4G'
+        }
+        client { client() }
+        server { server() }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    // Cobblemon
+    maven {
+        name = 'ImpactDev'
+        url = 'https://maven.impactdev.net/repository/development/'
+    }
+    // Kotlin for Forge (Cobblemon's runtime Kotlin provider)
+    maven {
+        name = 'KotlinForForge'
+        url = 'https://thedarkcolour.github.io/KotlinForForge/'
+    }
+    // Optional integration: Cobblemon: Mega Showdown (compile is not required, see COMPAT.md)
+    exclusiveContent {
+        forRepository { maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' } }
+        filter { includeGroup 'maven.modrinth' }
+    }
+}
+
+dependencies {
+    // Cobblemon is a hard dependency: the spawn-influence and party integrations compile against it.
+    implementation "com.cobblemon:neoforge:${cobblemon_version}"
+
+    // Cobblemon's API is Kotlin. We only need the stdlib types (Function1, collections) at compile
+    // time - at runtime Kotlin is provided by Kotlin for Forge, which Cobblemon already requires.
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}"
+    runtimeOnly "thedarkcolour:kotlinforforge-neoforge:${kff_version}"
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    def expansions = [
+            mod_id         : mod_id,
+            mod_name       : mod_name,
+            mod_version    : mod_version,
+            mod_authors    : mod_authors,
+            mod_license    : mod_license,
+            mod_description: mod_description,
+            neoforge_version: neoforge_version,
+            minecraft_version: minecraft_version,
+    ]
+    inputs.properties(expansions)
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
+        expand expansions
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : mod_name,
+                'Implementation-Version'  : mod_version,
+                'Implementation-Vendor'   : mod_authors,
+        ])
+    }
+}

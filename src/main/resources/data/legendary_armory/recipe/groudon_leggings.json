@@ -1,0 +1,39 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mega_showdown"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "NSN",
+    "GEG",
+    "HDH"
+  ],
+  "key": {
+    "D": {
+      "item": "cobblemon:hard_stone"
+    },
+    "E": {
+      "item": "minecraft:magma_block"
+    },
+    "G": {
+      "item": "cobblemon:ground_gem"
+    },
+    "H": {
+      "item": "cobblemon:fire_stone"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "S": {
+      "item": "mega_showdown:red_orb"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "legendary_armory:groudon_leggings"
+  }
+}
