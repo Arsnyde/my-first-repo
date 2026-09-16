@@ -1,0 +1,42 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:mod_loaded",
+        "modid": "mega_showdown"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "HDH",
+    "GSG",
+    "NEN"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:netherite_scrap"
+    },
+    "E": {
+      "item": "minecraft:diamond_block"
+    },
+    "G": {
+      "item": "cobblemon:steel_gem"
+    },
+    "H": {
+      "item": "cobblemon:dragon_gem"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "S": {
+      "item": "legendary_armory:dominion_core"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "legendary_armory:dialga_chestplate"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " M ",
+    "GNG",
+    " I "
+  ],
+  "key": {
+    "M": {
+      "item": "cobblemon:master_ball"
+    },
+    "N": {
+      "item": "minecraft:nether_star"
+    },
+    "G": {
+      "tag": "legendary_armory:type_gems"
+    },
+    "I": {
+      "item": "minecraft:netherite_ingot"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "legendary_armory:dominion_core"
+  }
+}

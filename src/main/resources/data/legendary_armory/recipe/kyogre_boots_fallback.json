@@ -1,0 +1,35 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:mod_loaded",
+        "modid": "mega_showdown"
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "GDG",
+    "HNH"
+  ],
+  "key": {
+    "D": {
+      "item": "cobblemon:deep_sea_scale"
+    },
+    "G": {
+      "item": "cobblemon:water_gem"
+    },
+    "H": {
+      "item": "cobblemon:water_stone"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "legendary_armory:kyogre_boots"
+  }
+}

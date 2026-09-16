@@ -1,0 +1,32 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mega_showdown"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "GDG",
+    "HNH"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:netherite_scrap"
+    },
+    "G": {
+      "item": "cobblemon:steel_gem"
+    },
+    "H": {
+      "item": "cobblemon:dragon_gem"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "legendary_armory:dialga_boots"
+  }
+}

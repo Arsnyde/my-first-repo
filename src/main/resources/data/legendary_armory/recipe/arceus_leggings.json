@@ -1,0 +1,39 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "mega_showdown"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "NSN",
+    "GEG",
+    "HDH"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:netherite_block"
+    },
+    "E": {
+      "item": "minecraft:gold_block"
+    },
+    "G": {
+      "tag": "legendary_armory:type_gems"
+    },
+    "H": {
+      "item": "cobblemon:ability_patch"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "S": {
+      "item": "mega_showdown:legend_plate"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "legendary_armory:arceus_leggings"
+  }
+}
