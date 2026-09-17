@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.arsnyde.battleclarity.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "BlockEntityRenderDispatcherMixin",
+    "BlockRenderDispatcherMixin"
+  ]
+}

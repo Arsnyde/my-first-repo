@@ -1,0 +1,82 @@
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.107'
+}
+
+version = mod_version
+group = mod_group_id
+base { archivesName = mod_id }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories {
+    mavenCentral()
+    // Cobblemon
+    maven { url = 'https://maven.impactdev.net/repository/development/' }
+    // Kotlin For Forge (Cobblemon is a Kotlin mod and needs this at runtime)
+    maven { url = 'https://thedarkcolour.github.io/KotlinForForge/' }
+    maven { url = 'https://maven.neoforged.net/releases' }
+}
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    // Register our mixin config so it is applied in the dev runs too.
+    validateAccessTransformers = true
+
+    runs {
+        client {
+            client()
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'debug'
+            gameDirectory = file('run')
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+dependencies {
+    // Cobblemon itself. `implementation` so it is on the dev runtime classpath as well,
+    // but it is NOT bundled into our jar - players install Cobblemon themselves.
+    implementation "com.cobblemon:neoforge:${cobblemon_version}"
+    // Cobblemon is Kotlin; KFF supplies the Kotlin runtime.
+    implementation "thedarkcolour:kotlinforforge-neoforge:${kff_version}"
+}
+
+// Expand the gradle.properties values into neoforge.mods.toml.
+tasks.named('processResources', ProcessResources).configure {
+    def expandProps = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
+    ]
+
+    inputs.properties(expandProps)
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand expandProps
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
