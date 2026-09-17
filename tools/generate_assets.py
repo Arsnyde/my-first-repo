@@ -49,6 +49,67 @@ def noise(x, y, seed):
 
 # --------------------------------------------------------------------------- item icons
 
+# Per-set silhouette additions: horns, crests and fins that make each helmet read as its Pokemon.
+HELMET_EXTRAS = {
+    "rings":   [(2, 3), (1, 4), (13, 3), (14, 4)],                  # Rayquaza head fins
+    "plates":  [(2, 2), (2, 3), (13, 2), (13, 3)],                  # Groudon shoulder spikes
+    "slashes": [(1, 5), (2, 4), (14, 5), (13, 4)],                  # Kyogre head fins
+    "crest":   [(7, 0), (8, 0), (7, 1), (8, 1)],                    # Dialga crown fin
+    "pearls":  [(2, 5), (13, 5), (2, 6), (13, 6)],                  # Palkia neck pearls
+    "ribs":    [(4, 1), (6, 0), (9, 0), (11, 1)],                   # Giratina six point crown
+    "prism":   [(5, 0), (7, 1), (8, 1), (10, 0)],                   # Necrozma light spikes
+    "wheel":   [(1, 6), (14, 6), (1, 7), (14, 7)],                  # Arceus wheel nubs
+}
+
+
+def motif_pixels(motif, cells, piece):
+    """Which pixels of a silhouette get painted in the set's secondary accent."""
+    if not cells:
+        return set()
+    xs = [x for x, _ in cells]
+    ys = [y for _, y in cells]
+    x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+    marks = set()
+
+    if motif == "rings":
+        # Rayquaza: yellow ring segments down the length of the body.
+        for y in range(y0 + 2, y1, 3):
+            row = sorted(x for x, yy in cells if yy == y)
+            if len(row) >= 2:
+                marks.update({(row[0], y), (row[1], y), (row[-2], y), (row[-1], y)})
+    elif motif == "plates":
+        # Groudon: pale spikes along every upward facing edge.
+        for x, y in cells:
+            if (x, y - 1) not in cells and y > y0:
+                marks.add((x, y))
+    elif motif == "slashes":
+        # Kyogre: red slashes cutting across the body.
+        marks.update((x, y) for x, y in cells if (x + y) % 5 == 0)
+    elif motif == "crest":
+        # Dialga: a diamond core in the middle of the piece.
+        cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+        marks.update((x, y) for x, y in cells if abs(x - cx) + abs(y - cy) in (1, 2))
+    elif motif == "pearls":
+        # Palkia: pink pearl clusters on the outer edges.
+        for y in range(y0 + 1, y1, 4):
+            row = sorted(x for x, yy in cells if yy == y)
+            if row:
+                marks.update({(row[0], y), (row[-1], y), (row[0], y + 1), (row[-1], y + 1)})
+    elif motif == "ribs":
+        # Giratina: golden ribs running vertically.
+        marks.update((x, y) for x, y in cells if x % 3 == x0 % 3)
+    elif motif == "prism":
+        # Necrozma: cyan light shards on the diagonal.
+        marks.update((x, y) for x, y in cells if (x - y) % 4 == 0)
+    elif motif == "wheel":
+        # Arceus: the ring, plus the cross of its plates.
+        cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+        marks.update((x, y) for x, y in cells
+                     if abs(x - cx) + abs(y - cy) == 3 or x == cx or y == cy)
+
+    return {p for p in marks if p in cells}
+
+
 def piece_mask(piece):
     """Returns a set of (x, y) pixels covered by the silhouette, plus the accent rows."""
     cells = set()
@@ -97,10 +158,14 @@ def piece_mask(piece):
     return cells, accent_rows
 
 
-def draw_icon(path, palette, piece):
+def draw_icon(path, palette, accent2, motif, piece):
     base, light, dark, accent = (hex_to_rgb(c) for c in palette)
+    accent2 = hex_to_rgb(accent2)
     outline = shade(dark, 0.55)
     cells, accent_rows = piece_mask(piece)
+    if piece == "helmet":
+        cells.update(HELMET_EXTRAS.get(motif, []))
+    marks = motif_pixels(motif, cells, piece)
 
     pixels = []
     for y in range(16):
@@ -113,6 +178,8 @@ def draw_icon(path, palette, piece):
                        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
             if edge:
                 row.append(outline + (255,))
+            elif (x, y) in marks:
+                row.append(mix(accent2, light, 0.15 * noise(x, y, 5)) + (255,))
             elif y in accent_rows:
                 row.append(accent + (255,))
             else:
@@ -151,9 +218,31 @@ def draw_core_icon(path):
 
 # --------------------------------------------------------------------------- armour layers
 
-def draw_armor_layer(path, palette, layer):
+def layer_mark(motif, x, y, layer):
+    """The same per-set motif, tiled across an armour layer so the worn set matches the icons."""
+    if motif == "rings":
+        return y % 8 == 3 and x % 6 < 3
+    if motif == "plates":
+        return y % 16 in (2, 3) and x % 4 < 2
+    if motif == "slashes":
+        return (x + y) % 9 in (0, 1)
+    if motif == "crest":
+        return (abs((x % 12) - 6) + abs((y % 12) - 6)) == 3
+    if motif == "pearls":
+        return (x % 9 in (3, 4)) and (y % 9 in (3, 4))
+    if motif == "ribs":
+        return x % 5 == 2
+    if motif == "prism":
+        return (x - y) % 7 in (0, 1)
+    if motif == "wheel":
+        return (abs((x % 14) - 7) + abs((y % 14) - 7)) in (4, 5)
+    return False
+
+
+def draw_armor_layer(path, palette, accent2, motif, layer):
     """A 64x32 armour layer. Every pixel is opaque, so all model faces get covered."""
     base, light, dark, accent = (hex_to_rgb(c) for c in palette)
+    accent2 = hex_to_rgb(accent2)
     trim_rows = {5, 6} if layer == 1 else {20, 21}
     pixels = []
     for y in range(32):
@@ -161,6 +250,8 @@ def draw_armor_layer(path, palette, layer):
         for x in range(64):
             if y in trim_rows:
                 colour = mix(accent, light, 0.25 * noise(x, y, 11))
+            elif layer_mark(motif, x, y, layer):
+                colour = mix(accent2, dark, 0.22 * noise(x, y, 13))
             else:
                 # Vertical shading inside each 16 pixel model band keeps plates looking plated.
                 band = (y % 16) / 15.0
@@ -241,12 +332,15 @@ def main():
     for set_id, data in SETS.items():
         palette = data["palette"]
 
-        draw_armor_layer(os.path.join(ASSETS, "textures", "models", "armor", f"{set_id}_layer_1.png"), palette, 1)
-        draw_armor_layer(os.path.join(ASSETS, "textures", "models", "armor", f"{set_id}_layer_2.png"), palette, 2)
+        accent2, motif = data["accent2"], data["motif"]
+        draw_armor_layer(os.path.join(ASSETS, "textures", "models", "armor", f"{set_id}_layer_1.png"),
+                         palette, accent2, motif, 1)
+        draw_armor_layer(os.path.join(ASSETS, "textures", "models", "armor", f"{set_id}_layer_2.png"),
+                         palette, accent2, motif, 2)
 
         for piece in PIECES:
             item_id = f"{set_id}_{piece}"
-            draw_icon(os.path.join(ASSETS, "textures", "item", f"{item_id}.png"), palette, piece)
+            draw_icon(os.path.join(ASSETS, "textures", "item", f"{item_id}.png"), palette, accent2, motif, piece)
             write_json(os.path.join(ASSETS, "models", "item", f"{item_id}.json"), item_model(item_id))
 
             if data["signature_mod"] is None:

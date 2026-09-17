@@ -16,6 +16,8 @@ TYPE_GEMS = [
 # palette: (base, light, dark, accent) as #RRGGBB
 SETS = {
     "rayquaza": {
+        "accent2": "#F5E04A",
+        "motif": "rings",
         "title": "Sky Sovereign",
         "bonus": "Delta Stream",
         "pokemon": "Rayquaza",
@@ -33,6 +35,8 @@ SETS = {
         "signature_mod": None,
     },
     "groudon": {
+        "accent2": "#D9D2C4",
+        "motif": "plates",
         "title": "Continent Crusher",
         "bonus": "Drought",
         "pokemon": "Groudon",
@@ -50,6 +54,8 @@ SETS = {
         "signature_mod": MS,
     },
     "kyogre": {
+        "accent2": "#D6402F",
+        "motif": "slashes",
         "title": "Abyssal Tide",
         "bonus": "Drizzle",
         "pokemon": "Kyogre",
@@ -67,6 +73,8 @@ SETS = {
         "signature_mod": MS,
     },
     "dialga": {
+        "accent2": "#5FD3F0",
+        "motif": "crest",
         "title": "Temporal Aegis",
         "bonus": "Roar of Time",
         "pokemon": "Dialga",
@@ -84,6 +92,8 @@ SETS = {
         "signature_mod": MS,
     },
     "palkia": {
+        "accent2": "#E86FAE",
+        "motif": "pearls",
         "title": "Spatial Rift",
         "bonus": "Spacial Rend",
         "pokemon": "Palkia",
@@ -101,6 +111,8 @@ SETS = {
         "signature_mod": MS,
     },
     "giratina": {
+        "accent2": "#D8A33A",
+        "motif": "ribs",
         "title": "Renegade Shroud",
         "bonus": "Shadow Force",
         "pokemon": "Giratina",
@@ -118,6 +130,8 @@ SETS = {
         "signature_mod": MS,
     },
     "necrozma": {
+        "accent2": "#6FF0E8",
+        "motif": "prism",
         "title": "Prismatic Dawn",
         "bonus": "Prismatic Laser",
         "pokemon": "Necrozma",
@@ -135,6 +149,8 @@ SETS = {
         "signature_mod": MS,
     },
     "arceus": {
+        "accent2": "#5BC47E",
+        "motif": "wheel",
         "title": "Judgment Plate",
         "bonus": "Multitype",
         "pokemon": "Arceus",
