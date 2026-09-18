@@ -24,10 +24,8 @@ You want it to say `21.x`. If it says 17 or 8, Java 21 is not on your PATH and t
 
 ## 2. Get the code
 
-The mod lives on a branch, not on `main`, so the `-b` flag matters:
-
 ```
-git clone -b claude/cobblemon-battle-transparency-mjhyrx https://github.com/Arsnyde/my-first-repo.git battleclarity
+git clone https://github.com/Arsnyde/my-first-repo.git battleclarity
 cd battleclarity
 ```
 
@@ -72,12 +70,17 @@ common cause of a crash on startup.
 Kotlin For Forge catches people out — Cobblemon is written in Kotlin but ships without the Kotlin
 runtime on NeoForge, so without it the game crashes before reaching the title screen.
 
-Drop all the jars into your mods folder:
+Drop `battleclarity-1.0.0.jar` into your instance's mods folder. For your CurseForge instance that is:
 
-- Vanilla launcher: `%APPDATA%\.minecraft\mods` (paste that into the Windows Explorer address bar)
-- Prism / MultiMC / ATLauncher: the instance's own `.minecraft/mods` folder
+```
+C:\Users\snyde\curseforge\minecraft\Instances\My Cobblemon Mods Test\mods
+```
 
-Then launch the NeoForge 1.21.1 profile.
+Cobblemon, Kotlin For Forge and NeoForge are presumably already there — check the folder and only add
+what is missing. Then launch that instance.
+
+**Sodium in that pack is fine.** It is explicitly supported; see step 7 if you want to confirm the
+Sodium-specific hook actually engaged.
 
 **This is a client-only mod.** If you play on a server, only you need it — the server doesn't, and putting
 it there does nothing.
@@ -103,9 +106,10 @@ Expected on the first run. Capture the errors:
 
 Send me `build-log.txt`, or just the lines containing `error:`. The likely culprits, in order:
 
-1. **A mixin signature drifted.** `BlockRenderDispatcher#renderBatched` / `#renderLiquid` and
+1. **A mixin signature drifted.** `RenderChunkRegion#getBlockState` and
    `BlockEntityRenderDispatcher#render` were verified against documentation but not against the real
-   1.21.1 jar. A mismatch here is a one-line fix.
+   1.21.1 jar. A mismatch here is a one-line fix. (The Sodium hook was read from Sodium's own source, so
+   it is on firmer ground.)
 2. **`LevelRenderer#setBlocksDirty` not accessible.** Fixed by adding an access transformer.
 3. **A Cobblemon method name.** Less likely — all of them were read out of the Cobblemon 1.8.1 source.
 
@@ -114,15 +118,16 @@ names them.
 
 ## 7. If it builds but nothing happens in game
 
-**First suspect: Sodium or Embeddium.** They replace Minecraft's chunk renderer entirely and never call
-the method this mod hooks, so hidden blocks keep drawing. Remove them to test. Supporting them needs
-separate compatibility code.
-
-Otherwise, check `logs/latest.log`:
+Check `logs/latest.log`:
 
 - Search for `battleclarity`. The mod is deliberately configured to **crash loudly at startup** if a
   mixin fails to apply, rather than silently doing nothing — so a clean startup means the hooks are live.
 - Search for `Mixin apply failed`.
+- To confirm the Sodium path engaged, search for `LevelSlice`. That mixin is applied only when Sodium is
+  detected, so seeing it mentioned means the Sodium-specific hook is in place.
+
+**If you run Embeddium rather than Sodium**, that is a known gap — it is a fork under different package
+names and needs its own hook. Sodium is supported; Embeddium is not yet.
 
 Settings live in `config/battleclarity-client.toml`, created on first launch. If the effect is too
 aggressive or too timid, `sightMargin` and `dilation` are the two dials worth touching first — see the

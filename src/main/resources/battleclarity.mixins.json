@@ -8,6 +8,6 @@
   },
   "client": [
     "BlockEntityRenderDispatcherMixin",
-    "BlockRenderDispatcherMixin"
+    "RenderChunkRegionMixin"
   ]
 }

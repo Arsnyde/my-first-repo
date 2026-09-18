@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "minVersion": "0.8.5",
+  "package": "com.arsnyde.battleclarity.mixin.sodium",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "com.arsnyde.battleclarity.compat.SodiumMixinPlugin",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "LevelSliceMixin"
+  ]
+}

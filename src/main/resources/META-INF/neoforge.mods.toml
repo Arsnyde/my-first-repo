@@ -13,6 +13,10 @@ description = '''${mod_description}'''
 [[mixins]]
 config = "${mod_id}.mixins.json"
 
+# Applied only when Sodium is installed, gated by SodiumMixinPlugin.
+[[mixins]]
+config = "${mod_id}.sodium.mixins.json"
+
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 type = "required"

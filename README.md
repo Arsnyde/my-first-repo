@@ -72,14 +72,40 @@ horns render outside it, and those are exactly the parts that end up buried in a
 | Floor protection | Applied last and wins over everything: support blocks and anything below the lowest feet are restored. |
 
 The set is published behind a single `volatile` reference to an effectively-immutable
-`LongOpenHashSet`. Three mixins read it:
+`LongOpenHashSet`, read lock-free from the chunk-build worker threads.
 
-- `BlockRenderDispatcher#renderBatched` — normal blocks, cancelled during chunk meshing.
-- `BlockRenderDispatcher#renderLiquid` — water and lava in walls.
-- `BlockEntityRenderDispatcher#render` — chests, signs, beds and banners, which are drawn every frame
-  outside the chunk mesh and would otherwise float in the hole.
+Rather than cancelling the draw call, the mod hooks the **block accessor the chunk mesher reads
+through** and reports hidden positions as air:
 
-The first two run on chunk-build worker threads, hence the lock-free snapshot.
+| Mixin | Renderer |
+|---|---|
+| `RenderChunkRegion#getBlockState` | Vanilla |
+| `LevelSlice#getBlockState(int, int, int)` | Sodium |
+| `BlockEntityRenderDispatcher#render` | Both — see below |
+
+One hook per renderer covers everything, because the mesher derives the model, the fluid, the block
+entity and the occlusion graph from that same block state. It also gets face culling right: neighbouring
+blocks see air where the hidden block was and render their inner faces, instead of culling against a
+block that is no longer being drawn and leaving a see-through gap.
+
+Only the chunk-build view of the world is affected. Collision, raycasts, redstone and the server all
+still see the block — nothing about the actual world changes.
+
+The block-entity hook is not strictly required (an air block reports no block entity, so the mesher drops
+it anyway) but chunk rebuilds are asynchronous, and it makes chests and signs vanish on the same frame as
+everything else rather than a few frames later.
+
+### Renderer support
+
+| | |
+|---|---|
+| Vanilla | Supported |
+| Sodium | Supported — `LevelSlice` hooked by name, applied only when Sodium is present |
+| Embeddium | Not supported yet; it is a fork with different package names, so it needs its own hook |
+
+The Sodium mixin targets its class by string and its signature is entirely vanilla types, so the mod
+**builds without any dependency on Sodium** and loads fine whether or not it is installed.
+`SodiumMixinPlugin` gates the config on the class actually being present.
 
 ### Keeping it cheap
 
@@ -122,10 +148,11 @@ and `hideNonSolidBlocks = false`.
 
 ## Known limitations
 
-- **Sodium / Embeddium replace the chunk mesher and bypass `BlockRenderDispatcher#renderBatched`
-  entirely.** With either installed, hidden blocks will keep rendering. Supporting them needs a separate
-  compat mixin against their own block-rendering path. This is the most likely reason for "nothing
-  happens" reports.
+- **Embeddium is not supported.** It forks Sodium under different package names, so it needs its own
+  hook. Sodium itself is supported.
+- Faces revealed around the opening are lit by the light value stored at the hidden position, which for a
+  block inside a wall is zero. Expect a dark rim around a hole punched through thick terrain. Fixing it
+  properly means hooking two different lighting pipelines, so it is left as-is.
 - Blocks are hidden, not literally alpha-blended. Chunk geometry is baked per render layer, so true
   per-block translucency would mean excluding the block from the mesh *and* re-drawing it yourself in a
   translucent pass with a cached vertex buffer. That is a sensible next step — and it would let the
@@ -147,13 +174,14 @@ written in, so **this code has never been compiled or run.** What *was* verified
   on blocked hosts.
 - All Java sources parse cleanly — the only compiler diagnostics are unresolved Minecraft/Cobblemon
   symbols from the absent classpath.
-- `BlockRenderDispatcher#renderBatched` and `#renderLiquid` match two independent documentation sources.
 - `ClientTickEvent.Post` is confirmed by NeoForge's own 1.21.1 docs.
+- `LevelSlice#getBlockState(int, int, int)` was read from Sodium's own source at tag `mc1.21.1-0.6.13`,
+  along with `ChunkBuilderMeshingTask` to confirm it is the accessor the mesher actually reads through.
 - Cobblemon does **not** jar-in-jar Kotlin For Forge on NeoForge (only mongo, graal and molang), so it has
   to be installed separately. Confirmed from Cobblemon's `neoforge/build.gradle.kts`.
 
-Still unverified against the real 1.21.1 jar: `BlockEntityRenderDispatcher#render`, and whether
-`LevelRenderer#setBlocksDirty` is accessible — if it is not, it needs a one-line access transformer.
+Still unverified against the real 1.21.1 jar: `RenderChunkRegion#getBlockState`,
+`BlockEntityRenderDispatcher#render`, and whether `LevelRenderer#setBlocksDirty` is accessible — if it is not, it needs a one-line access transformer.
 `injectors.defaultRequire` is set to `1` deliberately, so a signature that no longer matches fails loudly
 at startup instead of silently doing nothing.
 
