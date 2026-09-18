@@ -31,6 +31,9 @@ cannot grief a world.
 
 ## Building
 
+**Installing it to actually play? See [INSTALL.md](INSTALL.md)** for the full walkthrough — prerequisites,
+which companion mods you need, and what to do when the first build fails.
+
 ```bash
 ./gradlew build
 ```
@@ -144,11 +147,15 @@ written in, so **this code has never been compiled or run.** What *was* verified
   on blocked hosts.
 - All Java sources parse cleanly — the only compiler diagnostics are unresolved Minecraft/Cobblemon
   symbols from the absent classpath.
+- `BlockRenderDispatcher#renderBatched` and `#renderLiquid` match two independent documentation sources.
+- `ClientTickEvent.Post` is confirmed by NeoForge's own 1.21.1 docs.
+- Cobblemon does **not** jar-in-jar Kotlin For Forge on NeoForge (only mongo, graal and molang), so it has
+  to be installed separately. Confirmed from Cobblemon's `neoforge/build.gradle.kts`.
 
-The parts most likely to need a fix on first compile are the mixin method signatures, since they could not
-be checked against the real 1.21.1 jar. `injectors.defaultRequire` is set to `1` deliberately, so a
-signature that no longer matches fails loudly at startup instead of silently doing nothing. If
-`LevelRenderer#setBlocksDirty` turns out not to be accessible, it needs a one-line access transformer.
+Still unverified against the real 1.21.1 jar: `BlockEntityRenderDispatcher#render`, and whether
+`LevelRenderer#setBlocksDirty` is accessible — if it is not, it needs a one-line access transformer.
+`injectors.defaultRequire` is set to `1` deliberately, so a signature that no longer matches fails loudly
+at startup instead of silently doing nothing.
 
 ## Licence
 
