@@ -1,5 +1,24 @@
 # Building and installing on your PC
 
+## The quick way
+
+Download [`install.ps1`](install.ps1), put it anywhere, and run this in PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+It fetches the source (no Git needed), builds it, copies the jar into your mods folder, and checks the
+instance for Cobblemon, Kotlin For Forge, Sodium and Embeddium. A different instance:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1 -ModsDir "D:\Some\Other\mods"
+```
+
+You still need the Java 21 JDK first — see step 1. The rest of this page is the manual version.
+
+---
+
 This gets Cobblemon Battle Clarity from source to running in your Minecraft.
 
 > **Read this first.** This mod has never been compiled — the Minecraft, NeoForge and Cobblemon
