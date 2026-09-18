@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,6 +36,18 @@ jobs:
             build/libs/*.jar
             !build/libs/*-sources.jar
           if-no-files-found: error
+
+      - name: Publish as a downloadable release
+        if: success() && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          JAR=$(ls build/libs/*.jar | grep -v -- '-sources.jar' | head -1)
+          echo "Publishing $JAR"
+          gh release view latest >/dev/null 2>&1 || gh release create latest \
+            --title "Cobblemon Battle Clarity - latest build" \
+            --notes "Automatic build of the latest commit on main. Drop the .jar into your mods folder. Requires Minecraft 1.21.1, NeoForge 21.1.x, Cobblemon 1.8.x and Kotlin For Forge."
+          gh release upload latest "$JAR" --clobber
 
       - name: Upload the build log on failure
         if: failure()
